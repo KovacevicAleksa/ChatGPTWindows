@@ -1,7 +1,8 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QPushButton, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QPushButton, QLabel, QSlider
+from PyQt5.QtCore import Qt
 import openai
-openai.api_key = "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"
+openai.api_key = "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"
 
 class Chatbot(QWidget):
     def __init__(self):
@@ -17,14 +18,26 @@ class Chatbot(QWidget):
         self.sendbutton = QPushButton("Send")
         self.sendbutton.clicked.connect(self.send_message)
 
-        # Create temperature and max tokens input boxes
-        self.temperature_input = QLineEdit("0.7")
-        self.temperature_input.setFixedWidth(100)
-        self.temperature_label = QLabel("Temperature:")
+        # Create temperature and max tokens input sliders
+        self.temperature_slider = QSlider(Qt.Horizontal)
+        self.temperature_slider.setMinimum(1)
+        self.temperature_slider.setMaximum(100)
+        self.temperature_slider.setTickPosition(QSlider.TicksBelow)
+        self.temperature_slider.setTickInterval(5)
+        self.temperature_slider.setValue(70)
+        self.temperature_slider.valueChanged.connect(self.on_temperature_slider_value_changed)
 
-        self.max_tokens_input = QLineEdit("100")
-        self.max_tokens_input.setFixedWidth(100)
-        self.max_tokens_label = QLabel("Max Tokens:")
+        self.max_tokens_slider = QSlider(Qt.Horizontal)
+        self.max_tokens_slider.setMinimum(1)
+        self.max_tokens_slider.setMaximum(500)
+        self.max_tokens_slider.setTickPosition(QSlider.TicksBelow)
+        self.max_tokens_slider.setTickInterval(10)
+        self.max_tokens_slider.setValue(100)
+        self.max_tokens_slider.valueChanged.connect(self.on_max_tokens_slider_value_changed)
+
+        # Create labels for sliders
+        self.temperature_label = QLabel("Temperature: {:.2f}".format(self.temperature_slider.value() / 100))
+        self.max_tokens_label = QLabel("Max Tokens: {}".format(self.max_tokens_slider.value()))
 
         # Set up layout
         vbox = QVBoxLayout()
@@ -32,9 +45,9 @@ class Chatbot(QWidget):
 
         hbox = QHBoxLayout()
         hbox.addWidget(self.temperature_label)
-        hbox.addWidget(self.temperature_input)
+        hbox.addWidget(self.temperature_slider)
         hbox.addWidget(self.max_tokens_label)
-        hbox.addWidget(self.max_tokens_input)
+        hbox.addWidget(self.max_tokens_slider)
 
         vbox.addLayout(hbox)
 
@@ -47,17 +60,21 @@ class Chatbot(QWidget):
 
         # Set up OpenAI API
         self.engine = "davinci"
-        self.max_tokens = 100
-        self.temperature = 0.7
+        self.max_tokens = self.max_tokens_slider.value()
+        self.temperature = self.temperature_slider.value() / 100
+
+    def on_temperature_slider_value_changed(self, value):
+        self.temperature_label.setText("Temperature: {:.2f}".format(value / 100))
+        self.temperature = value / 100
+
+    def on_max_tokens_slider_value_changed(self, value):
+        self.max_tokens_label.setText("Max Tokens: {}".format(value))
+        self.max_tokens = value
 
     def send_message(self):
         # Get user input
         message = self.inputbox.text().strip()
         self.inputbox.clear()
-
-        # Get temperature and max tokens values from input boxes
-        self.temperature = float(self.temperature_input.text())
-        self.max_tokens = int(self.max_tokens_input.text())
 
         # Generate response from OpenAI API
         response = openai.Completion.create(
@@ -80,7 +97,7 @@ if __name__ == '__main__':
     chatbot = Chatbot()
 
     # Set window properties and show
-    chatbot.setWindowTitle('Chatbot')
+    chatbot.setWindowTitle('CHATBOT V1.1.0')
     chatbot.setGeometry(100, 100, 800, 600)
     chatbot.show()
 
