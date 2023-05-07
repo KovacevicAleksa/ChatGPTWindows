@@ -2,7 +2,8 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QPushButton, QLabel, QSlider
 from PyQt5.QtCore import Qt
 import openai
-openai.api_key = "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"
+#!!!ADD YOUR API_KEY FREE FROM https://platform.openai.com/account/api-keys!!!
+openai.api_key = "YOUR API_KEY"
 
 class Chatbot(QWidget):
     def __init__(self):
